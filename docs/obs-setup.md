@@ -4,7 +4,7 @@ Stream the Spire shows toasts in OBS with a **Browser Source** pointed at the ov
 
 **Prerequisites:** Overlay server running (`run-server.cmd`) and layout saved on the [config page](configuration-and-testing.md). See [Getting started](getting-started.md) if you have not installed yet.
 
-**Setup video:** [Watch on YouTube](setup-video.md) — includes OBS browser source setup.
+**Setup video:** [Watch on YouTube](setup-video.md): includes OBS browser source setup.
 
 ---
 

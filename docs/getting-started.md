@@ -7,7 +7,7 @@ Download the **Windows 64-bit release zip**, extract it, run the server, copy th
 ## What you need
 
 - **Windows** PC
-- **[.NET 10 ASP.NET Core Runtime](https://dotnet.microsoft.com/download/dotnet/10.0)** (Windows x64) — required to run `OverlayServer.exe`; install once if `run-server.cmd` asks for a runtime
+- **[.NET 10 ASP.NET Core Runtime](https://dotnet.microsoft.com/download/dotnet/10.0)** (Windows x64): required to run `OverlayServer.exe`; install once if `run-server.cmd` asks for a runtime
 - **Slay the Spire 2** (Steam)
 - **OBS Studio** (or any app with a transparent browser source)
 - Optional: local [image catalog](image-catalog.md) for full-art toasts
@@ -114,7 +114,7 @@ From there you can:
 
 - Drag **slot** positions on the layout preview (match preview canvas size to your OBS browser source).
 - Choose **image** or **text** display mode.
-- Set animations, sounds, ignore lists, and **reward playback** order.
+- Set animations, **sound mode** (on / off / first and last event), ignore lists, and **animation bands** (when multiple toasts play).
 
 Click **Save config** - the OBS overlay picks up changes over WebSocket without restarting OBS.
 

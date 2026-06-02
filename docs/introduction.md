@@ -24,6 +24,16 @@ Default server URL: **http://127.0.0.1:5055**
 
 ## What it can do
 
+### Key terms
+
+| Term | Plain meaning |
+|------|----------------|
+| **Toast** | The popup on your stream when you gain a card, relic, or potion (or when other events fire). It animates in, holds, then animates out. |
+| **Parallel** | Multiple toasts **at the same time** (in the band or slot group you configured). |
+| **Sequential** | Toasts **one after another**: the next waits until the current one finishes. |
+
+Full definitions (slots, bands, queues, both timing levels): [Configuration and testing: Terminology](configuration-and-testing.md#terminology).
+
 ### Event types
 
 The mod and server understand these event types. You can turn each one on or off on the config page (Cards / Relics / Potions tabs → event rules).
@@ -46,24 +56,36 @@ The mod and server understand these event types. You can turn each one on or off
 
 Switch modes on the config page (tabs above the layout preview). One setting applies to cards, relics, and potions.
 
-### Layout
+### Layout and animation bands
 
 - Up to **12 slots** total, up to **4 per type** (card, relic, potion).
 - Drag slot ghosts on the layout preview to match your stream layout; set preview canvas size to your OBS Browser Source resolution (e.g. 1920×1080) and **save**.
 - Per-type scale controls how large toasts appear on stream.
+- **Animation bands** (below the preview) group slots and control **when** toasts play (sequential or parallel **within** each band and **across** bands). See [Configuration and testing: Animation bands](configuration-and-testing.md#animation-bands).
 
 ### Sounds and animation
 
-Global **enter** and **exit** animations and sounds apply to all events. You can upload custom sound files from the config page.
+Global **enter** and **exit** animations apply to all events unless a band sets its own enter/exit animation. Global **enter** and **exit** sounds are chosen under **Global settings → Sound**.
 
-### Reward playback
+**Sound mode** (on `/config`):
 
-When several rewards arrive at once (typical after combat):
+| Mode | When to use |
+|------|-------------|
+| **First event and last event end** (default) | Reward screens and parallel picks: one enter at the start of a burst, one exit when the last item from that burst is assigned |
+| **On (every toast)** | Hear enter/exit on every item (sounds are queued so they never overlap) |
+| **Off** | Silent toasts |
 
-- **Parallel**  - Up to one toast per free slot per type; multiple types can show at the same time.
-- **Sequential** (default) - Types play in order (e.g. relic → card → potion). Each type waits until the previous type finishes; within a type, all free slots of that type fill together (e.g. two card slots → two cards at once).
+Details and examples: [Configuration and testing: Sounds](configuration-and-testing.md#sounds-animations-and-event-rules). You can upload custom sound files from the config page.
 
-Set **Reward playback** under the layout preview on the config page.
+### Playback after combat rewards
+
+When several rewards arrive at once (typical after combat), the server queues by item type (card / relic / potion) and assigns toasts using your **animation bands**:
+
+- **Band playback sequential**: Band 1 finishes (slots idle, queues empty for those slots) before Band 2 starts. Replaces the old “relic → card → potion” type order when each type has its own band.
+- **Band playback parallel**: All active bands can show toasts at the same time.
+- **Slot playback sequential**: One slot in the band at a time. **Parallel**: every free slot in the band can fill at once.
+
+Configure bands on **`/config`** under the layout preview. **Export setup…** in the bottom action bar saves slots + bands to a JSON file for another PC or backup.
 
 ### Ignore lists
 
@@ -95,7 +117,7 @@ flowchart LR
 In plain terms:
 
 1. You pick up a relic in-game → mod POSTs a `relic_gained` event to the server.
-2. Server checks ignore lists, slot availability, and playback mode → queues a toast.
+2. Server checks ignore lists, slot availability, and **animation bands** → queues a toast.
 3. Server sends a **show** message over WebSocket → overlay page animates the toast in the matching slot.
 4. When you change settings on `/config` and save, the server stores config and broadcasts updates to connected **overlay** clients over WebSocket.
 

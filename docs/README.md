@@ -36,7 +36,7 @@ With the server running: **http://127.0.0.1:5055/help**
 
 ### Using the overlay
 
-- [Configuration and testing](configuration-and-testing.md) - layout, Save vs Test, reward playback
+- [Configuration and testing](configuration-and-testing.md) - layout, terminology (toast, parallel, sequential), animation bands, export/import setup
 - [Ignore lists](ignore-items.md) - global IDs, `/item-ids`, per-event toggles
 
 ### Help
