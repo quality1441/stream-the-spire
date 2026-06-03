@@ -15,14 +15,6 @@ Use after config UI changes. Server: `scripts\run-server.cmd` (http://127.0.0.1:
 | **Bottom action bar** | Status line; **Export setup…**, **Import setup…**, **Save config**, **Reload**. |
 | **Validation** | Add slots past limits (4/type, 12 total): notice appears and save is blocked until fixed. |
 
-## Config round-trip (`slots[]`, `itemTypes`, `animationBands`, globals)
-
-Automated:
-
-```text
-scripts\verify-config-roundtrip.cmd
-```
-
 Manual:
 
 1. Set global ignore ID, change global enter animation, tweak one event’s delay override.
@@ -52,15 +44,6 @@ scripts\verify-config-roundtrip.cmd
 (confirms `soundMode` persists through PUT/GET)
 
 ## Animation bands
-
-Automated scenarios:
-
-```text
-scripts\test-overlay-queue.cmd -BandTest -FastDisplay
-scripts\test-overlay-queue.cmd -BandTest -BandScenario SequentialWithinBand -NoBrowser
-```
-
-Manual:
 
 | Setup | Expected on overlay / server logs |
 |-------|-----------------------------------|
@@ -97,18 +80,6 @@ Import must **not** wipe global delay, ignore lists, or event rules until you Sa
 - **Gap:** preview canvas size is not auto-read from OBS: set to match your Browser Source and save.
 
 ## FIFO queue (same type, multiple slots)
-
-Requires **2–4 slots of one type** in one band (or parallel slot playback) and that type **On**.
-
-```text
-scripts\test-overlay-queue.cmd -TwoCardSlots
-```
-
-With 2 card slots and 5 events, expect events to cycle through available card slots as each frees up.
-
-```text
-scripts\test-overlay-all-types.cmd -TwoSlotsPerType -FastDisplay
-```
 
 ## Disabled type / no slots / disabled event
 
