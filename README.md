@@ -46,8 +46,6 @@ Optional full-art mode: [sts2-image-versions](https://github.com/quality1441/sts
 - **[docs/getting-started.md](docs/getting-started.md)** - first-run checklist
 - With server running: **http://127.0.0.1:5055/help**
 
-Maintainers: **[scripts/README.md](scripts/README.md)** (build, test, `publish-release.cmd`).
-
 ## Environment variables (common)
 
 | Variable | Default | Purpose |
@@ -59,4 +57,4 @@ More variables: **[docs/image-catalog.md](docs/image-catalog.md)**, **[docs/mod-
 
 ## License
 
-Slay the Spire 2 and its assets are property of Mega Crit. Unofficial fan tool — see [docs/README.md](docs/README.md) for details.
+Slay the Spire 2 and its assets are property of Mega Crit. This is an unofficial fan-made tool — see [docs/README.md](docs/README.md) for details.
