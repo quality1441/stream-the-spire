@@ -1,3 +1,5 @@
+<img width="1376" height="768" alt="Stream-The-Spire-Wallpaper" src="https://github.com/user-attachments/assets/da7c5b7e-9e20-4181-ab61-6f0eb3fb8d57" />
+
 # Stream the Spire
 
 Live overlay toasts for **Slay the Spire 2** streams.
