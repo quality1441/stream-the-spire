@@ -1,6 +1,6 @@
 # Configuration and testing
 
-Stream the Spire settings live on the **config page**. The **overlay** page is for OBS only. Use **Test**, **Export setup**, and the optional test scripts to verify layout without launching STS2.
+Stream the Spire settings live on the **config page**. The **overlay** page is for OBS only. Use **Test** and **Export setup** to verify layout without launching STS2.
 
 ---
 
@@ -284,21 +284,6 @@ See [Ignore lists](ignore-items.md) for global and per-event filtering. Default 
 **Important:** After **Test**, the running server remembers those values until you **Save**, **Reload** from disk, or restart the server. Always **Save** when your layout is final.
 
 **Test** requires OBS (or a browser tab) open on **`/overlay`**. Status will note if no overlay is connected on WebSocket.
-
----
-
-## Automated testing (scripts)
-
-Server must be running (`scripts\run-server.cmd`).
-
-| Script | Purpose |
-|--------|---------|
-| `scripts\verify-config-roundtrip.cmd` | PUT/GET test for `slots[]`, `itemTypes`, `animationBands`, `soundMode`, and legacy migration |
-| `scripts\test-overlay-queue.cmd` | Card FIFO queue test |
-| `scripts\test-overlay-queue.cmd -BandTest -FastDisplay` | Three animation band scenarios (parallel single band, sequential within band, sequential across bands) |
-| `scripts\test-overlay-all-types.cmd` | Mixed card / relic / potion queue stress test |
-
-Band test details: [scripts/README.md](../scripts/README.md). Maintainer checklist: [Config & overlay manual tests](config_overlay_manual_tests.md).
 
 ---
 
