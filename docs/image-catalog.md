@@ -42,7 +42,7 @@ C:\dev\sts2-image-versions\
 - **`STS2_IMAGE_VERSIONS_ROOT`** - parent folder containing one subfolder per game version (`v0.103.2`, `v0.104.0`, …).
 - **`STS2_GAME_VERSION`** - name of the subfolder to use (include the `v` prefix if the folder uses it).
 
-Cards may include nested paths (character pools, etc.). Relics and potions follow the same `{kind}\{itemId}.webp` style the server indexes at startup.
+Cards may include nested paths (character pools, etc.). Relics and potions follow the same `{kind}\{itemId}.webp` style the server indexes when the catalog loads.
 
 ---
 
@@ -50,40 +50,28 @@ Cards may include nested paths (character pools, etc.). Relics and potions follo
 
 1. Open **http://127.0.0.1:5055/config**.
 2. Under **Global settings → Image catalog**, set:
-   - **Catalog root** → `{STS2_IMAGE_VERSIONS_ROOT}` (e.g. `C:\dev\sts2-image-versions`)
-   - **Game version folder** → `{STS2_GAME_VERSION}` (e.g. `v0.103.2`)
+   - **Catalog root** (e.g. `C:\dev\sts2-image-versions`)
+   - **Game version folder** (e.g. `v0.103.3`)
 3. Set **Display mode** to **Image** (tabs above the layout preview).
 4. **Save config**.
 
-The config page shows a **catalog status** line under the version folder (green = loaded at server start; yellow = paths changed - restart server).
+The server reloads the catalog when you save. You do **not** need to restart `run-server.cmd` after changing catalog root or game version.
+
+The **catalog status** line under the version folder updates after save (green = folders found and WebP files indexed; red = missing folder or empty catalog). Hard-refresh `/overlay` in OBS if art still looks cached in the browser.
 
 ---
 
-## Environment variables **(OPTIONAL)**
+## Environment variables (optional fallbacks)
 
-Set these **before starting the server** if you prefer env over the config page.
+The running overlay server reads **Catalog root** and **Game version folder** from saved config (`data/config.json`). Environment variables are optional fallbacks when those config fields are empty, and are still used by maintainer scripts (for example `build-item-index.cmd`).
 
 | Variable | Default | Purpose |
 |----------|---------|---------|
-| `STS2_IMAGE_VERSIONS_ROOT` | `C:\dev\sts2-image-versions` | Root folder with version subfolders |
-| `STS2_GAME_VERSION` | `v0.103.2` | Version subfolder name under the root |
-| `STS2_OVERLAY_VERSION_ROOT` | - | **Advanced:** point directly at a folder that already contains `cards\`, `potions\`, and `relics\` (skips root + version join) |
+| `STS2_IMAGE_VERSIONS_ROOT` | `C:\dev\sts2-image-versions` | Fallback catalog root when config does not set one |
+| `STS2_GAME_VERSION` | `v0.103.2` | Fallback version subfolder when config does not set one |
+| `STS2_OVERLAY_VERSION_ROOT` | - | **Advanced:** point directly at a folder that already contains `cards\`, `potions\`, and `relics\` (skips root + version join). Used only when config catalog fields are empty. Legacy alias: `STS2_OVERLAY_ASSET_ROOT`. |
 
-**Precedence:** If `STS2_OVERLAY_VERSION_ROOT` is set, it wins over catalog root + game version. The legacy alias `STS2_OVERLAY_ASSET_ROOT` is treated the same way.
-
-Config page paths are used when env vars are not set (or for the root/version pair when `STS2_OVERLAY_VERSION_ROOT` is unset).
-
----
-
-## Restart the server after path changes
-
-The server resolves catalog paths **at startup**. After you change catalog root, game version, or any of the env vars above:
-
-1. **Save** on the config page (if you changed settings there).
-2. **Stop** `run-server.cmd` (Ctrl+C).
-3. **Start** the server again.
-
-Hard-refresh `/overlay` in OBS if art still looks cached.
+**Precedence:** Saved config wins over `STS2_IMAGE_VERSIONS_ROOT` and `STS2_GAME_VERSION`. Direct version root env vars apply only when config catalog fields are empty.
 
 ---
 
@@ -106,9 +94,23 @@ Using a catalog folder for the **wrong game patch** (or an empty/missing subfold
 - **Wrong frames or borders** - card pool / character frames do not match the item.
 - **404 in browser** - a direct `/cards/…` or `/relics/…` URL does not load.
 
-**Fix:** Match **Game version folder** to your STS2 patch, confirm `cards\`, `potions\`, and `relics\` exist under that folder, **restart the server**, and test again.
+**Fix:** Match **Game version folder** to your STS2 patch, confirm `cards\`, `potions\`, and `relics\` exist under that folder, **Save config** on the config page, and test again.
 
 More fixes: **[Troubleshooting](troubleshooting.md)**.
+
+---
+
+## Enchanted cards (image mode)
+
+When a **`card_enchanted`** event fires in **image mode**, the overlay can show:
+
+- The base card art from your catalog
+- Enchant wedge, icon, and amount layers (when present under `cards\` or from the mod icon cache)
+- Extra enchant description text on the card panel (from live game data, with server-side fallbacks in `data/enchantments.json`)
+
+**Text mode** shows a compact name toast only (no layered enchant art).
+
+If enchant icons are missing on a dual-PC setup, the server may not see the mod cache on the gaming PC. See [Dual PC setup](dual-pc-setup.md) and set **`STS2_MOD_CACHE_ICONS`** when the server and game run on different machines.
 
 ---
 

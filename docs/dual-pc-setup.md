@@ -114,7 +114,7 @@ Many dual-PC streamers already use this pattern for other overlays.
 |----------|--------|------------------------|
 | `ASPNETCORE_URLS` | PC running **server** | `http://0.0.0.0:5055` when the other PC must connect |
 | `STS2_OVERLAY_URL` | **Gaming PC** before STS2 | Default `http://127.0.0.1:5055` if server is on gaming PC; streaming PC’s `http://IP:5055` if server is on streaming PC |
-| `STS2_IMAGE_VERSIONS_ROOT` / catalog paths | PC running **server** | Local paths on that machine |
+| `STS2_IMAGE_VERSIONS_ROOT` / catalog paths | PC running **server** | Set on config page and **Save** (local paths on that machine). Env vars are optional fallbacks for empty config. |
 | `STS2_MOD_CACHE_ICONS` | PC running **server** | Only if server and mod cache are on different machines (advanced) |
 
 Set env vars **before** starting the server or game.

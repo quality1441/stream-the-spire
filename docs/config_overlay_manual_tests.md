@@ -7,13 +7,21 @@ Use after config UI changes. Server: `scripts\run-server.cmd` (http://127.0.0.1:
 | Area | What to check |
 |------|----------------|
 | **Header** | Title left; **Help** and **Donate** buttons right (`/config` only). |
-| **Global settings** | **Timing and animation** (delay, duration, enter/exit anim); **Sound** (mode, enter/exit sound pickers); **Event defaults** (ignore IDs); catalog root + GitHub link; game version. |
+| **Global settings** | **Timing and animation** (delay, duration, enter/exit anim); **Sound** (mode, enter/exit sound pickers); **Event defaults** (ignore IDs); catalog root + GitHub link; game version; catalog status after **Save**. |
 | **Layout preview** | **Display mode** tabs (Image / Text) above canvas; canvas preset / custom W/H; Snap 8px / Snap to slots; **Reset slots** and **Test** on top toolbar; scale dock beside preview. |
 | **Animation bands** | Band playback dropdown; **Add card/relic/potion/band**; band cards with slot playback, enter/exit anim, draggable chips, **Add selected slot**, **Remove band**; validation notice when misconfigured. |
 | **Item types** | Cards / Relics / Potions browser tabs with **On**; fused panel below with **Event rules**. |
 | **Event rules** | Per-event browser tabs (Gained, Removed, …) each with **On**; delay + show overrides. |
 | **Bottom action bar** | Status line; **Export setup…**, **Import setup…**, **Save config**, **Reload**. |
 | **Validation** | Add slots past limits (4/type, 12 total): notice appears and save is blocked until fixed. |
+
+## Config round-trip (`slots[]`, `itemTypes`, `animationBands`, globals)
+
+Automated:
+
+```text
+scripts\verify-config-roundtrip.cmd
+```
 
 Manual:
 
@@ -22,6 +30,13 @@ Manual:
 3. **Save config**: status should show slot count.
 4. Hard-refresh `/config`: values match.
 5. Inspect `data/config.json`: `slots`, `animationBands`, `itemTypes`, `displayMode`, `soundMode`, `previewCanvasPreset` / width / height, globals, per-type scales.
+
+## Image catalog (live reload)
+
+1. Note current **Game version folder** and catalog status line on `/config`.
+2. Change to another valid version folder that exists on disk; **Save config**.
+3. Catalog status should update without restarting the server (`/api/catalog-health` `gameVersion` matches saved config).
+4. Optional: `scripts\test-overlay-enchanted.cmd` in **image mode** shows layered enchant art.
 
 ## Sound modes
 
@@ -45,10 +60,19 @@ scripts\verify-config-roundtrip.cmd
 
 ## Animation bands
 
+Automated scenarios:
+
+```text
+scripts\test-overlay-queue.cmd -BandTest -FastDisplay
+scripts\test-overlay-queue.cmd -BandTest -BandScenario SequentialWithinBand -NoBrowser
+```
+
+Manual:
+
 | Setup | Expected on overlay / server logs |
 |-------|-----------------------------------|
 | One band, 2 card slots, slot playback **parallel**, fire 2 cards quickly | Both show together; two `Band assign` lines |
-| One band, 2 card slots, slot playback **sequential**, fire 2 cards quickly | One at a time; second after first slot frees |
+| One band, 2 card slots, slot playback **sequential**, fire 2 cards quickly | First card in slot 1; second in slot 2 while first is still up; second slides to slot 1 when first exits |
 | Band 1 = card, Band 2 = relic, band playback **sequential**, 1 card + 1 relic | Card first; relic after card band done |
 | Per-band enter anim differs from global | Toast uses band enter anim when assigned from that band |
 
@@ -81,6 +105,18 @@ Import must **not** wipe global delay, ignore lists, or event rules until you Sa
 
 ## FIFO queue (same type, multiple slots)
 
+Requires **2–4 slots of one type** in one band (or parallel slot playback) and that type **On**.
+
+```text
+scripts\test-overlay-queue.cmd -TwoCardSlots
+```
+
+With 2 card slots and 5 events, expect events to cycle through available card slots as each frees up.
+
+```text
+scripts\test-overlay-all-types.cmd -TwoSlotsPerType -FastDisplay
+```
+
 ## Disabled type / no slots / disabled event
 
 | Case | Expected |
@@ -102,4 +138,4 @@ Import must **not** wipe global delay, ignore lists, or event rules until you Sa
 
 - Preview canvas size is persisted in config but not auto-detected from OBS.
 - Per-event animation/sound overrides removed from UI: use globals, band enter/exit, or edit `config.json`.
-- Sequential slot playback within a band uses first slot in chip order for the next item of that type (not strict round-robin across two card slots).
+- Sequential slot playback within a band uses first free slot in chip order for the next item of that type. Multiple slots of the same type can stack (second slot while the first is still showing); when the front slot clears, the overlay slides the next item into the first ghost position.

@@ -32,7 +32,7 @@ With the server running: **http://127.0.0.1:5055/help**
 - [Mod installation](mod-installation.md) - copy the mod, `STS2_OVERLAY_URL`, firewall
 - [Dual PC setup](dual-pc-setup.md) - game PC + streaming PC *(untested)*
 - [OBS setup](obs-setup.md) - Browser Source, transparency, canvas size
-- [Image catalog](image-catalog.md) - optional WebP art for full-image mode
+- [Image catalog](image-catalog.md) - optional WebP art, live reload from config, enchanted cards in image mode
 
 ### Using the overlay
 

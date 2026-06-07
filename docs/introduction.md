@@ -44,14 +44,14 @@ The mod and server understand these event types. You can turn each one on or off
 | `card_removed` | Card removed from your deck | Shows a red “removed” mark on the art |
 | `card_transformed` | One card replaced by another | Shows previous and new card |
 | `card_upgraded` | Card upgraded | |
-| `card_enchanted` | Card enchanted | Uses mod-exported enchant art when available |
+| `card_enchanted` | Card enchanted | Image mode: layered enchant art + description overlay when catalog and mod data are available |
 | `relic_gained` | Relic obtained | |
 | `potion_gained` | Potion picked up | |
 | `potion_used` | Potion used | Shows a “removed” style mark |
 
 ### Display modes
 
-- **Image mode** - Full art for cards, relics, and potions when a local [image catalog](https://github.com/quality1441/sts2-image-versions) is configured. Cards can use layered preview art; the mod may also cache some in-game visuals.
+- **Image mode** - Full art for cards, relics, and potions when a local [image catalog](https://github.com/quality1441/sts2-image-versions) is configured. Cards can use layered preview art; enchanted cards add wedge, icon, and description overlays. The mod may also cache some in-game visuals.
 - **Text mode** - Compact name / description toasts for all item types. Works without a catalog.
 
 Switch modes on the config page (tabs above the layout preview). One setting applies to cards, relics, and potions.
@@ -72,7 +72,7 @@ Global **enter** and **exit** animations apply to all events unless a band sets 
 | Mode | When to use |
 |------|-------------|
 | **First event and last event end** (default) | Reward screens and parallel picks: one enter at the start of a burst, one exit when the last item from that burst is assigned |
-| **On (every toast)** | Hear enter/exit on every item (sounds are queued so they never overlap) |
+| **On (every toast)** | Separate pickups each get enter/exit; rapid events while a toast is still showing share one enter and one exit (sounds are queued so they never overlap) |
 | **Off** | Silent toasts |
 
 Details and examples: [Configuration and testing: Sounds](configuration-and-testing.md#sounds-animations-and-event-rules). You can upload custom sound files from the config page.
@@ -83,7 +83,7 @@ When several rewards arrive at once (typical after combat), the server queues by
 
 - **Band playback sequential**: Band 1 finishes (slots idle, queues empty for those slots) before Band 2 starts. Replaces the old “relic → card → potion” type order when each type has its own band.
 - **Band playback parallel**: All active bands can show toasts at the same time.
-- **Slot playback sequential**: One slot in the band at a time. **Parallel**: every free slot in the band can fill at once.
+- **Slot playback sequential**: One visible toast per item type at a time in band order, with overflow to a second same-type slot when the first is still up (the overlay slides it forward when the front slot clears). **Parallel**: every free slot in the band can fill at once.
 
 Configure bands on **`/config`** under the layout preview. **Export setup…** in the bottom action bar saves slots + bands to a JSON file for another PC or backup.
 
@@ -138,11 +138,9 @@ Use this checklist before your first stream:
 | Variable | Default | Purpose |
 |----------|---------|---------|
 | `STS2_OVERLAY_URL` | `http://127.0.0.1:5055` | Server URL for the game mod |
-| `STS2_IMAGE_VERSIONS_ROOT` | `C:\dev\sts2-image-versions` | Root folder for WebP catalogs |
-| `STS2_GAME_VERSION` | `v0.103.2` | Version subfolder under the catalog root |
 | `STS2_GAME_ROOT` | - | Your STS2 install folder (when copying the mod to a non-default path) |
 
-Restart the server after changing catalog paths.
+Catalog paths belong on the **config page** (saved to `data/config.json`). The server reloads them when you **Save**; you do not need to restart for catalog changes. See [Image catalog](image-catalog.md) for optional `STS2_IMAGE_VERSIONS_ROOT` / `STS2_GAME_VERSION` fallbacks and maintainer scripts.
 
 ## Optional image catalog
 
@@ -155,7 +153,7 @@ Full-image mode reads WebP files from a local folder layout:
   relics\
 ```
 
-Pre-built catalogs are published in **[sts2-image-versions](https://github.com/quality1441/sts2-image-versions)**. Point **Catalog root** and **Game version folder** on the config page, or set the environment variables above.
+Pre-built catalogs are published in **[sts2-image-versions](https://github.com/quality1441/sts2-image-versions)**. Set **Catalog root** and **Game version folder** on the config page and **Save config**.
 
 Without a catalog, use **text mode** or rely on limited art the mod exports at runtime.
 

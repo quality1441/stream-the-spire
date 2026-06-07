@@ -1,6 +1,6 @@
 # Configuration and testing
 
-Stream the Spire settings live on the **config page**. The **overlay** page is for OBS only. Use **Test** and **Export setup** to verify layout without launching STS2.
+Stream the Spire settings live on the **config page**. The **overlay** page is for OBS only. Use **Test**, **Export setup**, and the optional test scripts to verify layout without launching STS2.
 
 ---
 
@@ -26,10 +26,10 @@ These terms appear throughout the config page and this guide.
 | **Toast** | The animated notification on your stream when something happens in a run, usually picking up a **card**, **relic**, or **potion**. It enters with your chosen animation, stays for the configured **display duration**, then exits. **Image mode** shows art; **text mode** shows a compact name and description. |
 | **Slot** | A fixed place on screen where a toast can appear. You drag **slot ghosts** on the layout preview to match your stream layout. Each slot is typed (card, relic, or potion). |
 | **Parallel** | **At the same time.** In a given scope, multiple toasts may be on screen together. Example: two card slots with **slot playback** set to parallel → two cards can show at once when both are queued. |
-| **Sequential** | **One after another.** In a given scope, the next toast waits until the current one has finished (slot frees up). Example: **slot playback** sequential with two card slots → only one card toast visible at a time. |
+| **Sequential** | **One after another** in a band, except multiple slots of the **same type** can stack: while the first slot is still showing, the next item of that type uses the next free slot of the same type, then slides forward when the front slot clears. Other item types in the band still wait until blocking slots finish. |
 | **Band** | A group of slots that share playback rules. **Band 1**, **Band 2**, … play in list order when **band playback** is sequential. |
 | **Queue** | If rewards arrive faster than slots can show them, extras wait in line (per item type: card, relic, potion). When a slot frees up, the next queued item plays. |
-| **Sound group** | A burst of game events that arrive close together (within about 250 ms). Used by **First event and last event end** sound mode to decide when enter and exit sounds play. |
+| **Sound group** | Events that belong to one overlay burst: while any toast from the burst is still on screen, or items from it are still waiting in queue. Used to decide when enter and exit sounds play. |
 | **Sound mode** | Global setting: **On**, **Off**, or **First event and last event end** (default). Controls enter/exit sounds for each toast. See [Sounds](#sounds-animations-and-event-rules). |
 
 **Parallel** and **sequential** apply at **two levels** on the config page:
@@ -87,6 +87,14 @@ Tabs **above** the layout preview set **display mode** for all item types:
 | **Text** | Compact name / description toasts: no catalog required |
 
 Saved as `displayMode` / `cardDisplayMode`: `card` (image) or `text`.
+
+### Enchanted cards (image mode)
+
+**Image mode** supports layered **`card_enchanted`** toasts: catalog card art plus enchant wedge, icon, amount, and description overlay text when available. The mod sends enchant details from the game; the server fills gaps using bundled **`data/enchantments.json`**.
+
+**Text mode** does not render enchant layers. Use image mode with a [catalog](image-catalog.md) for full enchant visuals.
+
+On dual-PC setups, enchant icons may require the server to read the mod cache on the gaming PC. See [Dual PC setup](dual-pc-setup.md).
 
 ---
 
@@ -156,13 +164,13 @@ Select a slot by clicking its chip or its preview ghost before using **Add selec
 
 **Old sequential type order (relic → card → potion)**: Three bands in order, each with that type’s slots, **Band playback** sequential, **Slot playback** parallel within each band. Migrates automatically from legacy configs.
 
-**Combat clarity**: Band 1: both card slots, **Slot playback** sequential (one card at a time). Band 2: relic + potion slots, **Slot playback** parallel (relic and potion together after cards finish). **Band playback** sequential.
+**Combat clarity**: Band 1: both card slots, **Slot playback** sequential (first card in slot 1; a second card while slot 1 is still up goes to slot 2 and slides into slot 1 when slot 1 clears). Band 2: relic + potion slots, **Slot playback** parallel (relic and potion together after cards finish). **Band playback** sequential.
 
 **Same beat, different motion**: Band 1: card slot with enter `slide_in_left`. Band 2: relic slot with enter `fade_in`. **Band playback** parallel so both can show when rewards arrive together, but each uses its band animation.
 
 ### Mixed-type bands
 
-A single band may contain card, relic, and potion slots. **Slot playback** parallel shows every free slot that has a queued item. **Slot playback** sequential shows one slot at a time following **chip order** in the band (not round-robin across two card slots: the first free slot in order gets the next item of its type).
+A single band may contain card, relic, and potion slots. **Slot playback** parallel shows every free slot that has a queued item. **Slot playback** sequential shows one slot at a time following **chip order** in the band, except when several slots share the same type: a busy first card slot does not block the next card slot, and the overlay slides the back item forward when the front slot clears.
 
 ### Migration from older configs
 
@@ -230,13 +238,13 @@ Under **Global settings → Sound** on the config page:
 
 | Sound mode | Enter | Exit |
 |------------|-------|------|
-| **On (every toast)** | Every toast | Every toast |
+| **On (every toast)** | First toast in a burst only (see sound group) | Last toast in a burst only |
 | **Off** | None | None |
 | **First event and last event end** (default) | First toast in a **sound group** only | Last toast assigned from that group when nothing from the group is still waiting in queue |
 
-#### How **First event and last event end** works
+#### How sound grouping works
 
-1. **Sound group**: Events that arrive within about **250 ms** of each other belong to one group (typical combat reward burst).
+1. **Sound group**: Events belong to one group while any toast from that burst is still visible, or items from it are still waiting in queue (including during global delay before show). A new group starts once all slots are free and queues are empty.
 2. **Coalesce**: The server waits about **100 ms** after the last enqueue before assigning slots, so parallel reward picks usually assign in one pass.
 3. **Enter**: Only the **first** toast shown from the group plays the enter sound.
 4. **Exit**: Only the **last** toast **assigned** from the group plays the exit sound, and only when no items from that group are still waiting in queue. If slots assign one at a time (sequential slot playback), exit is deferred until the final item is assigned.
@@ -250,7 +258,7 @@ Server logs include `enterSound=` and `exitSound=` on each `Toast shown` line. M
 |-----------|------------|---------------|
 | Parallel reward: 2 cards + 1 relic at once | First event and last event end | One enter (first assigned toast), one exit (last assigned toast when queues empty) |
 | Single card pickup between fights | First event and last event end | One enter, one exit |
-| Every item should whoosh/pop | On (every toast) | Enter and exit on each toast (queued, not overlapping) |
+| Every item should whoosh/pop (separate pickups) | On (every toast) | Enter and exit on each separate pickup (queued, not overlapping) |
 | Silent stream | Off | Nothing |
 
 Custom sounds can be uploaded from the config page (stored under `data/sounds/`).
@@ -258,7 +266,7 @@ Custom sounds can be uploaded from the config page (stored under `data/sounds/`)
 **Event defaults**
 
 - **Ignore item IDs** (comma-separated, all events)
-- **Catalog root** and **game version**. See [Image catalog](image-catalog.md). Restart server after path changes.
+- **Catalog root** and **game version**. See [Image catalog](image-catalog.md). **Save config** after changes; the server reloads the catalog without a restart.
 
 Per-event enter/exit animation and sound overrides are **not** in the UI; use globals or edit `config.json`.
 
@@ -287,13 +295,29 @@ See [Ignore lists](ignore-items.md) for global and per-event filtering. Default 
 
 ---
 
+## Automated testing (scripts)
+
+Server must be running (`scripts\run-server.cmd`).
+
+| Script | Purpose |
+|--------|---------|
+| `scripts\verify-config-roundtrip.cmd` | PUT/GET test for `slots[]`, `itemTypes`, `animationBands`, `soundMode`, and legacy migration |
+| `scripts\test-overlay-queue.cmd` | Card FIFO queue test |
+| `scripts\test-overlay-queue.cmd -BandTest -FastDisplay` | Three animation band scenarios (parallel single band, sequential within band, sequential across bands) |
+| `scripts\test-overlay-all-types.cmd` | Mixed card / relic / potion queue stress test |
+| `scripts\test-overlay-enchanted.cmd` | Debug enchanted card toast (image mode, layered art + description overlay) |
+
+Band test details: [scripts/README.md](../scripts/README.md). Maintainer checklist: [Config & overlay manual tests](config_overlay_manual_tests.md).
+
+---
+
 ## Config file location
 
 | Install | Path |
 |---------|------|
 | **Release zip** | `{extract folder}\data\config.json` |
 
-Restart the server after changing **catalog paths** in config. Most other changes apply live after **Save**.
+Most settings apply live after **Save**, including **catalog root** and **game version** (the server reloads art paths immediately). Restart the server only when upgrading Stream the Spire files or changing how the server is launched (for example `ASPNETCORE_URLS`).
 
 ### `animationBands` in config.json
 

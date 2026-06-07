@@ -122,7 +122,7 @@ Browse item IDs for ignore lists at **http://127.0.0.1:5055/item-ids**.
 
 ### 8. Optional: image catalog (full-art mode)
 
-Image mode uses WebP files from a local catalog (not included in the release zip). Download **[sts2-image-versions](https://github.com/quality1441/sts2-image-versions)**, then set **Catalog root** and **Game version** on the config page.
+Image mode uses WebP files from a local catalog (not included in the release zip). Download **[sts2-image-versions](https://github.com/quality1441/sts2-image-versions)**, then set **Catalog root** and **Game version** on the config page and **Save config**. The server reloads art immediately; no restart needed.
 
 Details: [Image catalog](image-catalog.md) - or [Introduction → Optional image catalog](introduction.md#optional-image-catalog).
 

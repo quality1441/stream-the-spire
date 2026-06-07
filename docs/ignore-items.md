@@ -31,7 +31,7 @@ Open **http://127.0.0.1:5055/item-ids** with the server running.
 - IDs match mod event payloads (`itemId`).
 - Upgraded cards use the **same base ID** - not listed separately.
 
-The index comes from your [image catalog](image-catalog.md) at server startup. If the page is empty, check catalog paths and restart the server.
+The index comes from your [image catalog](image-catalog.md). It reloads when you **Save config** after changing catalog paths. If the page is empty, check catalog paths on the config page, save, and confirm the status line under **Game version folder** is green.
 
 ### In-game
 
